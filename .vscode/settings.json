@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "elf.h": "c",
+        "dram.h": "c",
+        "register.h": "c"
+    }
+}
