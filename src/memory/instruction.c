@@ -54,7 +54,7 @@ static uint64_t decode_od(od_t od) {
             vaddr = od.imm + *(od.reg1) + (*(od.reg2)) * od.scal;
         }
 
-        return va2pa(vaddr);
+        return vaddr;
     }
 }
 
@@ -67,6 +67,9 @@ void init_handler_table() {
     // 原因：该.c文件引入头文件以后，声明会在该代码的前面，那么编译器就可以找到；若不声明，显然编译器找不到。
     // 或者你不在头文件中声明，就直接在该代码的前面实现 mov_reg_reg_handler() 也可以。
     handler_table[mov_reg_reg] = &mov_reg_reg_handler;
+    handler_table[mov_reg_mem] = &mov_reg_mem_handler;
+    handler_table[push_reg] = &push_reg_handler;
+    handler_table[pop_reg] = &pop_reg_handler;
     handler_table[call] = &call_handler;
     handler_table[add_reg_reg] = &add_reg_reg_handler;
 }
@@ -83,13 +86,41 @@ void instruction_cycle() {
 }
 
 void mov_reg_reg_handler(uint64_t src, uint64_t dst) {
-    /* 把一个寄存器中的值复制到另一个寄存器中
+    /* 把源寄存器中的值复制到目的寄存器中
     params:
-        src: 寄存器地址
-        dst: 寄存器地址
+        src: 源寄存器地址
+        dst: 目的寄存器地址
     */
     *(uint64_t *)dst = *(uint64_t *)src;
     reg.rip += sizeof(inst_t);
+}
+
+void mov_reg_mem_handler(uint64_t src, uint64_t dst) {
+    /* 把源寄存器中的值复制到目的寄存器指向的内存中
+    */
+    write64bits_dram(
+        va2pa(dst),
+        *(uint64_t *)src
+    );
+    reg.rip +=sizeof(inst_t);
+}
+
+void push_reg_handler(uint64_t src, uint64_t dst) {
+    /* 把源寄存器中的值压入栈中
+    params:
+        src: 源寄存器地址
+        dst: NULL
+    */
+    reg.rsp -= 0x8;
+    write64bits_dram(
+        va2pa(reg.rsp),
+        *(uint64_t *)src
+    );
+    reg.rip += sizeof(inst_t);
+}
+
+void pop_reg_handler(uint64_t src, uint64_t dst) {
+
 }
 
 void call_handler(uint64_t src, uint64_t dst) {
@@ -114,8 +145,8 @@ void call_handler(uint64_t src, uint64_t dst) {
 void add_reg_reg_handler(uint64_t src, uint64_t dst) {
     /* 把源寄存器中的值加到目标寄存器中
     params:
-        src: 寄存器地址
-        dst: 寄存器地址
+        src: 源寄存器地址
+        dst: 目的寄存器地址
     */
     *(uint64_t *)dst += *(uint64_t *)src;
     reg.rip += sizeof(inst_t);
