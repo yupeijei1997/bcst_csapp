@@ -11,6 +11,5 @@ int main() {
     uint64_t a = 0x12340000;
     uint64_t b = 0x0000abcd;
     uint64_t c = add(a, b);
-    char x = 'a';
     return 0;
 }
