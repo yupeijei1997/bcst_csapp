@@ -68,9 +68,11 @@ void init_handler_table() {
     // 或者你不在头文件中声明，就直接在该代码的前面实现 mov_reg_reg_handler() 也可以。
     handler_table[mov_reg_reg] = &mov_reg_reg_handler;
     handler_table[mov_reg_mem] = &mov_reg_mem_handler;
+    handler_table[mov_mem_reg] = &mov_mem_reg_handler;
     handler_table[push_reg] = &push_reg_handler;
     handler_table[pop_reg] = &pop_reg_handler;
     handler_table[call] = &call_handler;
+    handler_table[ret] = &ret_handler;
     handler_table[add_reg_reg] = &add_reg_reg_handler;
 }
 
@@ -97,12 +99,25 @@ void mov_reg_reg_handler(uint64_t src, uint64_t dst) {
 
 void mov_reg_mem_handler(uint64_t src, uint64_t dst) {
     /* 把源寄存器中的值复制到目的寄存器指向的内存中
+    params:
+        src: 源寄存器地址
+        dst: 目的寄存器地址
     */
     write64bits_dram(
         va2pa(dst),
         *(uint64_t *)src
     );
     reg.rip +=sizeof(inst_t);
+}
+
+void mov_mem_reg_handler(uint64_t src, uint64_t dst) {
+    /* 把源寄存器指向的内存中的值复制的目的寄存器中
+    params:
+        src: 源寄存器
+        dst: 目的寄存器
+    */
+    *(uint64_t *)dst = read64bits_dram(va2pa(src));
+    reg.rip += sizeof(inst_t);
 }
 
 void push_reg_handler(uint64_t src, uint64_t dst) {
@@ -120,7 +135,14 @@ void push_reg_handler(uint64_t src, uint64_t dst) {
 }
 
 void pop_reg_handler(uint64_t src, uint64_t dst) {
-
+    /* 把源寄存器中的值弹出栈中
+    params:
+        src: 源寄存器地址
+        dst: NULL
+    */
+    *(uint64_t *)src = read64bits_dram(va2pa(reg.rsp));
+    reg.rsp += 0x8;
+    reg.rip += sizeof(inst_t);
 }
 
 void call_handler(uint64_t src, uint64_t dst) {
@@ -140,6 +162,17 @@ void call_handler(uint64_t src, uint64_t dst) {
    );
 
    reg.rip = src;
+}
+
+void ret_handler(uint64_t src, uint64_t dst) {
+    /* 回到call指令的下一条指令的位置
+    params:
+        src: NULL
+        dst: NULL
+    */
+    uint64_t ret_addr = read64bits_dram(va2pa(reg.rsp));
+    reg.rsp += 0x8;
+    reg.rip = ret_addr;
 }
 
 void add_reg_reg_handler(uint64_t src, uint64_t dst) {

@@ -32,15 +32,15 @@ inst_t program[15] = {
     },
     {
         mov_mem_reg,
-        {   MM_IMM_REG, -0x18,  0,  (uint64_t *)&reg.rbp,   NULL},
-        {   REG,    0,  0,  (uint64_t *)&reg.rdx,   NULL},
-        "mov    -0x18(\%rbp),\%rdx"
-    },
-    {
-        mov_mem_reg,
         {   MM_IMM_REG,    -0x20,  0,  (uint64_t *)&reg.rbp,   NULL},
         {   REG,    0,  0,  (uint64_t *)&reg.rax,   NULL},
         "mov    -0x20(\%rbp),\%rax"
+    },
+    {
+        mov_mem_reg,
+        {   MM_IMM_REG,    -0x18,  0,  (uint64_t *)&reg.rbp,   NULL},
+        {   REG,    0,  0,  (uint64_t *)&reg.rdx,   NULL},
+        "mov    -0x18(\%rbp),\%rdx"
     },
     {
         add_reg_reg,
@@ -94,7 +94,7 @@ inst_t program[15] = {
     {
         mov_reg_mem,
         {   REG,    0,  0,  (uint64_t *)&reg.rax,   NULL},
-        {   MM_IMM_REG,    -0x8,  0,  (uint64_t *)&reg.rbp,   NULL},
+        {   MM_IMM_REG,    -0x18,  0,  (uint64_t *)&reg.rbp,   NULL},
         "mov    \%rax,-0x18(\%rbp)"
     },
 };
