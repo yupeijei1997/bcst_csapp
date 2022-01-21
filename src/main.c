@@ -24,13 +24,13 @@ int main() {
     write64bits_dram(va2pa(0x7fffffffe1e0), 0x00000000);  // rbp
     write64bits_dram(va2pa(0x7fffffffe1d8), 0x12340000);
     write64bits_dram(va2pa(0x7fffffffe1d0), 0x0000abcd);
-    write64bits_dram(va2pa(0x7fffffffe1c8), 0x004003d0);
+    write64bits_dram(va2pa(0x7fffffffe1c8), 0x00400400);
     write64bits_dram(va2pa(0x7fffffffe1c0), 0x00400500);  // rsp
     print_register();
     print_stack();
 
     // run inst
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 15; ++i) {
         instruction_cycle();
         print_register();
         print_stack();
